@@ -34,13 +34,19 @@ const addressSchema = z.object({
   landmark: z.string().optional(),
 })
 
-export function AddressForm() {
+interface AddressFormProps {
+  readOnly?: boolean;
+  initialData?: any;
+  onSuccess?: () => void;
+}
+
+export function AddressForm({ readOnly = false, initialData, onSuccess }: AddressFormProps) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
 
   const form = useForm<z.infer<typeof addressSchema>>({
     resolver: zodResolver(addressSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       address_type: "",
       flat_door_number: "",
       apartment_name: "",
@@ -61,6 +67,7 @@ export function AddressForm() {
         title: "Success",
         description: "Address updated successfully",
       })
+      onSuccess?.()
     } catch (error) {
       toast({
         variant: "destructive",

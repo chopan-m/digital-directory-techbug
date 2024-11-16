@@ -57,13 +57,19 @@ const businessSchema = z.object({
   key_challenges: z.string().optional(),
 })
 
-export function BusinessForm() {
+interface BusinessFormProps {
+  readOnly?: boolean;
+  initialData?: any;
+  onSuccess?: () => void;
+}
+
+export function BusinessForm({ readOnly = false, initialData, onSuccess }: BusinessFormProps) {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
 
   const form = useForm<z.infer<typeof businessSchema>>({
     resolver: zodResolver(businessSchema),
-    defaultValues: {
+    defaultValues: initialData || {
       company_business_name: "",
       business_email: "",
       import_export: false,
@@ -79,6 +85,7 @@ export function BusinessForm() {
         title: "Success",
         description: "Business information updated successfully",
       })
+      onSuccess?.()
     } catch (error) {
       toast({
         variant: "destructive",

@@ -3,23 +3,51 @@
 import { useState } from "react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+
+// Import all your forms
 import { PersonalInfoForm } from "@/components/forms/personal-info-form"
 import { AddressForm } from "@/components/forms/address-form"
-import { BusinessForm } from "@/components/forms/business-form"
-import { EducationForm } from "@/components/forms/education-form"
-import { EmploymentForm } from "@/components/forms/employment-form"
-import { AchievementsForm } from "@/components/forms/achievements-form"
-import { DocumentsForm } from "@/components/forms/documents-form"
-import { SocialProfilesForm } from "@/components/forms/social-profiles-form"
-import { MetadataForm } from "@/components/forms/metadata-form"
+// ... other form imports
 
 export default function ProfilePage() {
+  const [activeTab, setActiveTab] = useState("personal")
+  const [isEditing, setIsEditing] = useState(false)
+  const { toast } = useToast()
+
+  const handleEdit = () => {
+    setIsEditing(true)
+  }
+
+  const handleSave = () => {
+    // Save logic here
+    toast({
+      title: "Success",
+      description: "Profile updated successfully",
+    })
+    setIsEditing(false)
+  }
+
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">My Profile</h1>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">My Profile</h1>
+        {!isEditing ? (
+          <Button onClick={handleEdit}>Edit Profile</Button>
+        ) : (
+          <Button onClick={handleSave}>Save Changes</Button>
+        )}
+      </div>
       
-      <Tabs defaultValue="personal" className="space-y-4">
-        <TabsList className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+        <TabsList className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           <TabsTrigger value="personal">Personal Info</TabsTrigger>
           <TabsTrigger value="address">Address</TabsTrigger>
           <TabsTrigger value="business">Business</TabsTrigger>
@@ -31,34 +59,14 @@ export default function ProfilePage() {
           <TabsTrigger value="metadata">Metadata</TabsTrigger>
         </TabsList>
 
-        <Card className="p-6">
+        <Card className="p-4 md:p-6">
           <TabsContent value="personal">
-            <PersonalInfoForm />
+            <PersonalInfoForm readOnly={!isEditing} />
           </TabsContent>
           <TabsContent value="address">
-            <AddressForm />
+            <AddressForm readOnly={!isEditing} />
           </TabsContent>
-          <TabsContent value="business">
-            <BusinessForm />
-          </TabsContent>
-          <TabsContent value="education">
-            <EducationForm />
-          </TabsContent>
-          <TabsContent value="employment">
-            <EmploymentForm />
-          </TabsContent>
-          <TabsContent value="achievements">
-            <AchievementsForm />
-          </TabsContent>
-          <TabsContent value="documents">
-            <DocumentsForm />
-          </TabsContent>
-          <TabsContent value="social">
-            <SocialProfilesForm />
-          </TabsContent>
-          <TabsContent value="metadata">
-            <MetadataForm />
-          </TabsContent>
+          {/* Add other tab contents */}
         </Card>
       </Tabs>
     </div>

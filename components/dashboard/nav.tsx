@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useRef } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
@@ -16,7 +17,8 @@ import {
   FileText,
   Database,
   Share2,
-  Menu
+  Menu,
+  X
 } from "lucide-react"
 import { useNavigation } from "../providers/navigation-provider"
 
@@ -27,27 +29,27 @@ const items = [
     icon: LayoutDashboard,
   },
   {
-    title: "Users",
-    href: "/dashboard/users",
+    title: "My Profile",
+    href: "/dashboard/profile",
     icon: Users,
   },
   {
-    title: "Achievements",
+    title: "My Achievements",
     href: "/dashboard/achievements",
     icon: Trophy,
   },
   {
-    title: "Addresses",
+    title: "My Addresses",
     href: "/dashboard/addresses",
     icon: MapPin,
   },
   {
-    title: "Business",
+    title: "My Business",
     href: "/dashboard/business",
     icon: Briefcase,
   },
   {
-    title: "Education",
+    title: "My Education",
     href: "/dashboard/education",
     icon: GraduationCap,
   },
@@ -57,12 +59,12 @@ const items = [
     icon: Users2,
   },
   {
-    title: "Documents",
+    title: "My Documents",
     href: "/dashboard/documents",
     icon: FileText,
   },
   {
-    title: "Metadata",
+    title: "My Metadata",
     href: "/dashboard/metadata",
     icon: Database,
   },
@@ -75,25 +77,53 @@ const items = [
 
 export function DashboardNav() {
   const path = usePathname()
-  const { isOpen, toggle } = useNavigation()
+  const { isOpen, toggle, close } = useNavigation()
+  const drawerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    close()
+  }, [path, close])
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (drawerRef.current && !drawerRef.current.contains(event.target as Node)) {
+        close()
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen, close])
 
   return (
     <>
-      <div className="lg:hidden fixed top-4 left-4 z-50">
-        <Button variant="outline" size="icon" onClick={toggle}>
-          <Menu className="h-4 w-4" />
-        </Button>
-      </div>
-      <div className={cn(
-        "fixed inset-y-0 z-40 flex w-72 flex-col bg-background border-r transition-transform duration-300 ease-in-out lg:translate-x-0",
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      )}>
-        <div className="space-y-4 py-4">
-          <div className="px-6 py-2">
-            <h2 className="text-lg font-semibold">Dashboard</h2>
-          </div>
-          <ScrollArea className="flex-1">
-            <div className="space-y-1 px-3">
+      <Button 
+        variant="outline" 
+        size="icon" 
+        onClick={toggle}
+        className="fixed top-4 left-4 z-50 lg:hidden"
+      >
+        {isOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+      </Button>
+
+      <div 
+        ref={drawerRef}
+        className={cn(
+          "fixed inset-y-0 left-0 z-40 w-72 bg-background border-r transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static",
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <ScrollArea className="h-full py-6">
+          <div className="space-y-4 px-3">
+            <div className="px-3 py-2">
+              <h2 className="text-lg font-semibold">Dashboard</h2>
+            </div>
+            <nav className="space-y-1">
               {items.map((item) => (
                 <Link
                   key={item.href}
@@ -109,10 +139,17 @@ export function DashboardNav() {
                   {item.title}
                 </Link>
               ))}
-            </div>
-          </ScrollArea>
-        </div>
+            </nav>
+          </div>
+        </ScrollArea>
       </div>
+
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
+          onClick={close}
+        />
+      )}
     </>
   )
 }
