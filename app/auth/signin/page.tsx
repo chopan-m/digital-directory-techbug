@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/components/ui/use-toast"
-import { api } from "@/lib/api-mock"
+import { api } from "@/lib/api"
 import Link from "next/link"
 
 export default function SignIn() {
@@ -21,10 +21,16 @@ export default function SignIn() {
 
     const formData = new FormData(event.currentTarget)
     try {
-      await api.auth.signIn({
-        email: formData.get("email") as string,
+      const response = await api.auth.signIn({
+        emailId: formData.get("email") as string,
         password: formData.get("password") as string,
       })
+
+      if (response.success && response.data) {
+        localStorage.setItem('authToken', response.data.token)
+        localStorage.setItem('userData', JSON.stringify(response.data.user))
+      }
+
       router.push("/dashboard")
     } catch (error) {
       toast({
